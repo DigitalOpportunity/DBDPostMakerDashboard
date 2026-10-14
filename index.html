@@ -91,6 +91,12 @@ h2{margin:0;font-size:14px;font-weight:700;letter-spacing:.2px;text-transform:up
 .bar{height:8px;border-radius:6px;background:#f1f1f3}.bar i{display:block;height:100%;border-radius:6px;background:var(--red)}
 .act .row{grid-template-columns:30px 1.9fr 1.15fr .75fr .8fr .65fr .65fr .75fr .85fr .8fr;min-width:900px;padding:7px 8px;font-size:11.5px}
 .act .head{font-size:10.5px}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;color:var(--mute);font-size:12px}
+.pg{display:flex;align-items:center;gap:10px}
+.pg button{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;height:32px;padding:0 12px;font:600 12px Inter,sans-serif;cursor:pointer}
+.pg button:hover:not(:disabled){border-color:var(--red);color:var(--red)}
+.pg button:disabled{opacity:.4;cursor:not-allowed}
+.pg button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
 .who{display:flex;align-items:center;gap:8px;min-width:0}
 .dn{color:var(--red)}.upg{color:var(--green);font-weight:600}.dng{color:var(--red);font-weight:600}
 .foot{display:flex;justify-content:center;align-items:center;gap:8px;color:var(--mute);font-size:12px;margin-top:16px}
@@ -147,6 +153,7 @@ h2{margin:0;font-size:14px;font-weight:700;letter-spacing:.2px;text-transform:up
 <section class="card sec">
   <h2>Ranking Aktor Penyebar Berita DBD</h2>
   <div class="scroll act" id="act"></div>
+  <div class="pager" id="pager"></div>
 </section>
 
 <div class="foot"><span>Data diperbarui: <span id="upd">23 Mei 2025 14:30 WIB</span></span><button type="button" aria-label="Muat ulang data" id="refresh"></button></div>
@@ -170,12 +177,19 @@ const ORG=[['Kementerian Kesehatan RI','kemenkes','Pemerintah',312,12.7,89.2,39.
  ['IDAI (Ikatan Dokter Anak Indonesia)','idai','Organisasi Kesehatan',88,3.6,18.6,8.8,620,'Positif',0],
  ['Tribunnews.com','tribun','Media Online',74,2.9,14.8,7.8,480,'Netral',-2],
  ['Antara News','antara','Media Online',66,2.5,12.7,7.1,410,'Netral',0],
- ['CNN Indonesia','cnn','Media Online',59,2.2,11.3,6.8,390,'Netral',0]];
+ ['CNN Indonesia','cnn','Media Online',59,2.2,11.3,6.8,390,'Netral',0],
+ ...[['Liputan6.com','Media Online',54,2.0,10.4,6.2,350,'Netral',1],['Tempo.co','Media Online',51,1.9,9.8,5.7,330,'Netral',0],['Dinas Kesehatan Jawa Timur','Pemerintah',48,1.8,9.1,5.1,310,'Positif',2],
+ ['Halodoc','Organisasi Kesehatan',45,1.7,8.6,4.8,290,'Positif',-1],['Alodokter','Organisasi Kesehatan',42,1.6,7.9,4.3,270,'Positif',0],['Republika.co.id','Media Online',39,1.5,7.2,3.9,250,'Netral',0],
+ ['Dinas Kesehatan Jawa Barat','Pemerintah',36,1.4,6.6,3.6,230,'Netral',-1],['Kumparan','Media Online',33,1.3,6.1,3.2,210,'Netral',1],['IDI (Ikatan Dokter Indonesia)','Organisasi Kesehatan',30,1.2,5.5,2.9,190,'Positif',0],
+ ['PMI (Palang Merah Indonesia)','Organisasi Kesehatan',27,1.1,5.0,2.6,170,'Netral',-2]].map((r,i)=>{LG['x'+i]=[r[0].replace(/^(Dinas Kesehatan|PMI|IDI)\b.*/,(s,a)=>a==='Dinas Kesehatan'?'DK':a).slice(0,2).toUpperCase(),`background:hsl(${i*41+200} 45% 42%);font-size:10px`];return[r[0],'x'+i,...r.slice(1)]})];
 /* data perseorangan (contoh fiktif) */
 const IND=[['dr. Rina Kusuma, Sp.A','Tenaga Kesehatan',96,7.4,31.2,14.1,820],['Budi Santoso','Influencer',84,6.9,28.4,12.6,760],['Sari Wulandari','Warga',72,5.2,19.8,9.3,540],
  ['dr. Andi Pratama','Tenaga Kesehatan',61,4.8,16.5,7.7,470],['Dewi Anggraini','Influencer',55,4.1,14.2,6.9,430],['Hendra Wijaya','Warga',48,3.3,10.9,5.2,310],
- ['Maya Lestari','Warga',41,2.9,9.1,4.4,260],['dr. Fajar Nugroho','Tenaga Kesehatan',36,2.6,8.2,3.9,240],['Tono Prasetyo','Warga',30,2.1,6.3,3.1,190],['Lina Marlina','Warga',26,1.8,5.4,2.6,160]]
- .map((r,i)=>{const ini=r[0].replace(/^dr\. /,'').split(' ').map(w=>w[0]).slice(0,2).join('');LG['ind'+i]=[ini,`background:hsl(${i*37+10} 55% 46%)`];return[r[0],'ind'+i,r[1],r[2],r[3],r[4],r[5],r[6],i%3==2?'Positif':'Netral',[0,1,-1,2,0,-2,0,1,0,0][i]]});
+ ['Maya Lestari','Warga',41,2.9,9.1,4.4,260],['dr. Fajar Nugroho','Tenaga Kesehatan',36,2.6,8.2,3.9,240],['Tono Prasetyo','Warga',30,2.1,6.3,3.1,190],['Lina Marlina','Warga',26,1.8,5.4,2.6,160],
+ ['Agus Salim','Warga',22,1.6,4.8,2.3,140],['Putri Ayu','Influencer',20,1.5,4.4,2.1,130],['dr. Wulan Sari','Tenaga Kesehatan',18,1.4,4.0,1.9,120],['Rudi Hartono','Warga',16,1.2,3.5,1.6,105],
+ ['Nanda Pratiwi','Influencer',14,1.1,3.2,1.5,95],['Yoga Mahendra','Warga',13,1.0,2.9,1.3,85],['dr. Citra Dewi','Tenaga Kesehatan',11,.9,2.5,1.2,75],['Eko Saputra','Warga',10,.8,2.2,1.0,65],
+ ['Tika Rahayu','Warga',9,.7,2.0,.9,58],['Bayu Anggoro','Warga',8,.6,1.7,.8,50]]
+ .map((r,i)=>{const ini=r[0].replace(/^dr\. /,'').split(' ').map(w=>w[0]).slice(0,2).join('');LG['ind'+i]=[ini,`background:hsl(${i*37+10} 55% 46%)`];return[r[0],'ind'+i,r[1],r[2],r[3],r[4],r[5],r[6],i%3==2?'Positif':'Netral',[0,1,-1,2,0,-2,0,1,0,0][i%10]]});
 const KAB=[['Kota Jakarta Timur',186],['Kota Jakarta Selatan',152],['Kota Surabaya',128],['Kota Bandung',97],['Kota Medan',83]];
 const PROV0={'id-jk':340,'id-jb':230,'id-bt':205,'id-ji':150,'id-jt':120,'id-su':110,'id-sn':95,'id-ki':85,'id-ba':60,'id-ss':55,'id-yo':45,'id-sb':40,'id-la':35,'id-ri':32,'id-kb':28,'id-ks':26,'id-nb':22,'id-ac':20,'id-ja':18,'id-sa':15,'id-kt':14,'id-nt':12,'id-be':11,'id-bb':9,'id-kr':8,'id-st':7,'id-sg':6,'id-go':5,'id-ma':4,'id-pa':3};
 const SP0=[[3,4,4,6,5,7,6,8,7,9,7,8,10,14],[4,5,5,7,6,8,7,9,6,8,9,7,8,12]];
@@ -202,6 +216,7 @@ const spark=a=>{const w=200,h=48,mx=Math.max(...a),mn=Math.min(...a),p=a.map((v,
  return `<svg class="sp" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,${h} ${l} ${w},${h}" fill="rgba(217,20,30,.08)"/><polyline points="${l}" fill="none" stroke="#d9141e" stroke-width="1.6" vector-effect="non-scaling-stroke"/>${p.map(q=>`<circle cx="${q[0]}" cy="${q[1]}" r="1.6" fill="#d9141e"/>`).join('')}</svg>`};
 
 /* ---------- Filter -> data ---------- */
+let pg=0,LAST;const PS=10;
 const state={y:2025,m:5,t:'semua',pr:null}; /* pr = id provinsi terpilih dari peta (filter ke-4) */
 const rngOf=s=>{let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}let a=h;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
 const per=(y,m)=>y==2025&&m==5?1:(.55+((y*12+m)*37%45)/100)*(1+(y-2025)*.12);
@@ -233,13 +248,20 @@ function render(){
  const mx=D.kab[0][1]*1.075;
  $('kab').innerHTML=`<div class="row head"><span>#</span><span>Kabupaten / Kota</span><span>Proporsi</span><span class="rt">Posts</span></div>`+
   D.kab.map((r,i)=>`<div class="row"><span class="rk${i>2?' n':''}">${i+1}</span><span>${r[0]}</span><span class="bar"><i style="width:${r[1]/mx*100}%"></i></span><span class="red rt">${ni(r[1])}</span></div>`).join('');
+ LAST=D;renderAct();
+ $('upd').textContent=D.upd;drawMap();
+}
+
+function renderAct(){
  const cls={Pemerintah:'gov','Organisasi Kesehatan':'org'};
  $('act').innerHTML=`<div class="row head"><span>#</span><span>Aktor / Sumber</span><span class="c">Tipe Aktor</span><span class="c">Jumlah Posts</span><span class="c">Engagement</span><span class="c">Likes</span><span class="c">Comments</span><span class="c">Jangkauan</span><span class="c">Sentimen Dominan</span><span class="c">Perubahan Peringkat</span></div>`+
-  D.rows.map((r,i)=>`<div class="row">${i<3?medal(i+1):`<span class="c" style="font-size:12.5px">${i+1}</span>`}<span class="who">${logo(r.lg,1)}<span>${r.n}</span></span>
+  LAST.rows.slice(pg*PS,(pg+1)*PS).map((r,j)=>(i=>`<div class="row">${i<3?medal(i+1):`<span class="c" style="font-size:12.5px">${i+1}</span>`}<span class="who">${logo(r.lg,1)}<span>${r.n}</span></span>
   <span class="c"><span class="pill ${cls[r.ty]||'med'}">${r.ty}</span></span><span class="c">${ni(r.p)}</span><span class="c dn">↑ ${nf(r.e)}%</span><span class="c">${fk(r.l)}</span><span class="c">${fk(r.c)}</span><span class="c">${fk(r.r)}</span>
   <span class="c"><span class="pill ${r.s==='Positif'?'pos':'neu'}">${r.s}</span></span>
-  <span class="c ${r.ch>0?'upg':r.ch<0?'dng':''}">${r.ch>0?'↑ '+r.ch:r.ch<0?'↓ '+-r.ch:'–'}</span></div>`).join('');
- $('upd').textContent=D.upd;drawMap();
+  <span class="c ${r.ch>0?'upg':r.ch<0?'dng':''}">${r.ch>0?'↑ '+r.ch:r.ch<0?'↓ '+-r.ch:'–'}</span></div>`)(pg*PS+j)).join('');
+ const tot=LAST.rows.length,pages=Math.ceil(tot/PS);
+ $('pager').innerHTML=`<span>Menampilkan ${pg*PS+1}–${Math.min(tot,(pg+1)*PS)} dari ${tot} aktor</span><span class="pg"><button type="button" id="prev" ${pg?'':'disabled'}>‹ Sebelumnya</button><span>Halaman ${pg+1} / ${pages}</span><button type="button" id="next" ${pg<pages-1?'':'disabled'}>Setelahnya ›</button></span>`;
+ $('prev').onclick=()=>{pg--;renderAct()};$('next').onclick=()=>{pg++;renderAct()};
 }
 
 /* ---------- Peta ---------- */
@@ -271,7 +293,7 @@ const fill=(id,arr,sel)=>{$(id).innerHTML=arr.map(([v,l])=>`<option value="${v}"
 fill('f-y',[2025,2024,2023].map(v=>[v,v]),state.y);fill('f-m',BULAN.map((l,i)=>[i+1,l]),state.m);
 fill('f-t',[['semua','Semua (Perseorangan &amp; Organisasi)'],['perseorangan','Perseorangan'],['organisasi','Organisasi']],state.t);
 const page=document.querySelector('.page');
-function update(){page.classList.add('busy');setTimeout(()=>{render();page.classList.remove('busy')},180)}
+function update(){pg=0;page.classList.add('busy');setTimeout(()=>{render();page.classList.remove('busy')},180)}
 $('f-y').onchange=e=>{state.y=+e.target.value;update()};$('f-m').onchange=e=>{state.m=+e.target.value;update()};$('f-t').onchange=e=>{state.t=e.target.value;update()};
 $('refresh').onclick=()=>{$('refresh').firstChild.animate([{transform:'rotate(0)'},{transform:'rotate(360deg)'}],500);update()};
 render();
