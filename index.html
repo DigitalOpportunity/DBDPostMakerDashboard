@@ -219,8 +219,8 @@ const dl=d=>d==null?`<div class="up" style="color:var(--mute)">–<span>tidak ad
 const tgl=s=>{const[y,m,dd]=s.split('-');return `${+dd} ${BULAN[m-1]} ${y}`};
 function render(){
  const D=compute(),r1=D.top[0];
- $('kpis').innerHTML=`<article class="card kpi"><span class="ico">${svg('doc')}</span><small>Total Posts</small><div class="v">${ni(D.total)}</div>${dl(D.d)}${spark(D.s1)}</article>
- <article class="card kpi"><span class="ico">${svg('users')}</span><small>Total Actor</small><div class="v">${ni(D.actors)}</div>${dl(D.d2)}${spark(D.s2)}</article>
+ $('kpis').innerHTML=`<article class="card kpi"><span class="ico">${svg('doc')}</span><small>Total Posts</small><div class="v">${ni(D.total)}</div>${dl(D.d)}</article>
+ <article class="card kpi"><span class="ico">${svg('users')}</span><small>Total Actor</small><div class="v">${ni(D.actors)}</div>${dl(D.d2)}</article>
  <article class="card kpi"><span class="ico">${svg('crown')}</span><small>Top Posts Contributor</small>${r1?`<div class="v t">${esc(r1.n)}</div><p><b>${ni(r1.p)}</b> posts</p><div class="up" style="color:var(--ink)">${nf(r1.p/D.total*100)}% <span style="display:inline;color:var(--mute);font-weight:400">dari total</span></div>`:'<div class="v t">–</div>'}</article>
  <article class="card kpi"><span class="ico">${svg('trend')}</span><small>Most Discussed Contributor</small>${D.disc?`<div class="v t">${esc(D.disc.n)}</div><p><b>${ni(D.disc.v)}</b> kali dibalas / di-mention</p>`:'<div class="v t">–</div>'}</article>`;
  $('top5').innerHTML=`<div class="row head"><span>#</span><span></span><span>Post Contributor</span><span class="c">Tipe</span><span class="rt">Jumlah Posts</span></div>`+
